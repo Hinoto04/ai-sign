@@ -1,6 +1,6 @@
 import sys
 from PyQt5.QtCore import QPoint, QSize, Qt
-from PyQt5.QtGui import QImage
+from PyQt5.QtGui import QImage, QPainter, QPen
 from PyQt5.QtWidgets import QApplication, QFileDialog, QMainWindow, QAction, qApp, QDesktopWidget
 
 class DrawingTool(QMainWindow):
@@ -9,7 +9,7 @@ class DrawingTool(QMainWindow):
         self.image = QImage(QSize(160, 80), QImage.Format_RGB32)
         self.image.fill(Qt.white)
         self.drawing = False
-        self.brush_size = 5
+        self.brush_size = 3
         self.brush_color = Qt.black
         self.last_point = QPoint()
         self.initUI()
@@ -40,6 +40,27 @@ class DrawingTool(QMainWindow):
         cp = QDesktopWidget().availableGeometry().center()
         qr.moveCenter(cp)
         self.move(qr.topLeft())
+        
+    def paintEvent(self, e):
+        canvas = QPainter(self)
+        canvas.drawImage(self.rect(), self.image, self.image.rect())
+        
+    def mousePressEvent(self, e):
+        if e.button() == Qt.LeftButton:
+            self.drawing = True
+            self.last_point = e.pos()/5
+    
+    def mouseMoveEvent(self, e):
+        if(e.buttons() & Qt.LeftButton) & self.drawing:
+            painter = QPainter(self.image)
+            painter.setPen(QPen(self.brush_color, self.brush_size, Qt.SolidLine, Qt.RoundCap))
+            painter.drawLine(self.last_point, e.pos()/5)
+            self.last_point = e.pos()/5
+            self.update()
+    
+    def mouseReleaseEvent(self, e):
+        if e.button() == Qt.LeftButton:
+            self.drawing = False
     
     def save(self):
         fpath, _ = QFileDialog.getSaveFileName(self, 'Save Image', '', "PNG(*.png);;JPEG(*.jpg *.jpeg);;All Files(*.*) ")
