@@ -40,6 +40,9 @@ class DrawingTool(QMainWindow):
         cp = QDesktopWidget().availableGeometry().center()
         qr.moveCenter(cp)
         self.move(qr.topLeft())
+    
+    def pixelpos(self, x, y):
+        return QPoint(int(x/(self.width()/160)), int(y/(self.height()/80)))
         
     def paintEvent(self, e):
         canvas = QPainter(self)
@@ -48,14 +51,14 @@ class DrawingTool(QMainWindow):
     def mousePressEvent(self, e):
         if e.button() == Qt.LeftButton:
             self.drawing = True
-            self.last_point = e.pos()/5
+            self.last_point = self.pixelpos(e.x(), e.y())
     
     def mouseMoveEvent(self, e):
         if(e.buttons() & Qt.LeftButton) & self.drawing:
             painter = QPainter(self.image)
             painter.setPen(QPen(self.brush_color, self.brush_size, Qt.SolidLine, Qt.RoundCap))
-            painter.drawLine(self.last_point, e.pos()/5)
-            self.last_point = e.pos()/5
+            painter.drawLine(self.last_point, self.pixelpos(e.x(), e.y()))
+            self.last_point = self.pixelpos(e.x(), e.y())
             self.update()
     
     def mouseReleaseEvent(self, e):
