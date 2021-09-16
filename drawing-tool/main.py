@@ -4,6 +4,7 @@ from PyQt5.QtGui import QImage, QPainter, QPen
 from PyQt5.QtWidgets import QApplication, QFileDialog, QMainWindow, QAction, qApp, QDesktopWidget
 
 class DrawingTool(QMainWindow):
+    
     def __init__(self):
         super().__init__()
         self.image = QImage(QSize(160, 80), QImage.Format_RGB32)
@@ -12,6 +13,8 @@ class DrawingTool(QMainWindow):
         self.brush_size = 3
         self.brush_color = Qt.black
         self.last_point = QPoint()
+        self.last_way = []
+        self.waycount = 0
         self.initUI()
         
     def initUI(self):
