@@ -1,3 +1,4 @@
+import os
 import sys
 from PyQt5.QtCore import QPoint, QSize, Qt
 from PyQt5.QtGui import QImage, QPainter, QPen
@@ -13,8 +14,9 @@ class DrawingTool(QMainWindow):
         self.brush_size = 3
         self.brush_color = Qt.black
         self.last_point = QPoint()
-        self.last_way = []
+        self.username = 'Default'
         self.waycount = 0
+        self.number = 0
         self.initUI()
         
     def initUI(self):
@@ -29,6 +31,10 @@ class DrawingTool(QMainWindow):
         clear_action = QAction('Clear', self)
         clear_action.setShortcut('Ctrl+C')
         clear_action.triggered.connect(self.clear)
+        
+        next_action = QAction('Next', self)
+        next_action.setShortcut('Ctrl+N')
+        next_action.triggered.connect(self.next)
 
         filemenu.addAction(save_action)
         filemenu.addAction(clear_action)
@@ -54,6 +60,8 @@ class DrawingTool(QMainWindow):
     def mousePressEvent(self, e):
         if e.button() == Qt.LeftButton:
             self.drawing = True
+            self.waycount += 1
+            self.last_way.append(e.x(), e.y())
             self.last_point = self.pixelpos(e.x(), e.y())
     
     def mouseMoveEvent(self, e):
@@ -77,6 +85,13 @@ class DrawingTool(QMainWindow):
     def clear(self):
         self.image.fill(Qt.white)
         self.update()
+    
+    def next(self):
+        files = os.listdir('./data/')
+        fpath = './data/' + self.number + '.png'
+        self.image.save(fpath)
+        with open('record.csv', 'a') as f:
+            f.write(fpath + ',' + self.username)
         
 if __name__ == '__main__':
     app = QApplication(sys.argv)
