@@ -2,11 +2,10 @@ import cv2
 import os
 import os.path
 
-path = './img/싸인.png'
-src = cv2.imread(path)
+path = './img/sain.png'
+print(path)
 
-if os.path.exists(path):
-    print(src)
+src = cv2.imread(path)
 
 gray = cv2.cvtColor(src, cv2.COLOR_RGB2GRAY)
 tree = src.copy()
