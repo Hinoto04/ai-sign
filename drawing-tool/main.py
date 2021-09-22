@@ -2,7 +2,7 @@ import os
 import sys
 from PyQt5.QtCore import QPoint, QSize, Qt
 from PyQt5.QtGui import QImage, QPainter, QPen
-from PyQt5.QtWidgets import QApplication, QFileDialog, QMainWindow, QAction, qApp, QDesktopWidget
+from PyQt5.QtWidgets import QApplication, QFileDialog, QInputDialog, QMainWindow, QAction, QPushButton, qApp, QDesktopWidget
 
 class DrawingTool(QMainWindow):
     
@@ -14,8 +14,8 @@ class DrawingTool(QMainWindow):
         self.brush_size = 3
         self.brush_color = Qt.black
         self.last_point = QPoint()
+        self.savepath = ''
         self.username = 'Default'
-        self.waycount = 0
         self.number = 0
         self.initUI()
         
@@ -36,8 +36,17 @@ class DrawingTool(QMainWindow):
         next_action.setShortcut('Ctrl+N')
         next_action.triggered.connect(self.next)
 
+        filemenu.addAction(next_action)
         filemenu.addAction(save_action)
         filemenu.addAction(clear_action)
+        
+        self.btn = QPushButton('Set Username', self)
+        self.btn.move(5, 5)
+        self.btn.clicked.connect(self.setUsername)
+        
+        self.nbtn = QPushButton('Set Number', self)
+        self.nbtn.move(110, 5)
+        self.nbtn.clicked.connect(self.setNumber)
         
         self.setWindowTitle('Sign Drawing Tool')
         self.resize(800, 400)
@@ -50,6 +59,19 @@ class DrawingTool(QMainWindow):
         qr.moveCenter(cp)
         self.move(qr.topLeft())
     
+    def setUsername(self):
+        username, ok = QInputDialog.getText(self, 'InputDialog', 'Enter Username')
+
+        if ok:
+            self.username = username
+            self.number = 0
+        
+    def setNumber(self):
+        number, ok = QInputDialog.getInt(self, 'InputDialog', 'Enter Number')
+        
+        if ok:
+            self.number = number
+    
     def pixelpos(self, x, y):
         return QPoint(int(x/(self.width()/160)), int(y/(self.height()/80)))
         
@@ -60,8 +82,6 @@ class DrawingTool(QMainWindow):
     def mousePressEvent(self, e):
         if e.button() == Qt.LeftButton:
             self.drawing = True
-            self.waycount += 1
-            self.last_way.append(e.x(), e.y())
             self.last_point = self.pixelpos(e.x(), e.y())
     
     def mouseMoveEvent(self, e):
@@ -87,11 +107,16 @@ class DrawingTool(QMainWindow):
         self.update()
     
     def next(self):
-        files = os.listdir('./data/')
-        fpath = './data/' + self.number + '.png'
-        self.image.save(fpath)
-        with open('record.csv', 'a') as f:
-            f.write(fpath + ',' + self.username)
+        if self.savepath == '':
+            fpath = QFileDialog.getExistingDirectory(self, "Select Directory")
+            
+            if fpath:
+                self.savepath = fpath
+        else:
+            fpath = self.savepath + '/' + str(self.number) + '_' + self.username + '.png'
+            self.image.save(fpath)
+            self.clear()
+            self.number += 1
         
 if __name__ == '__main__':
     app = QApplication(sys.argv)
