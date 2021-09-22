@@ -1,13 +1,13 @@
-import os
 import sys
 from PyQt5.QtCore import QPoint, QSize, Qt
-from PyQt5.QtGui import QImage, QPainter, QPen
-from PyQt5.QtWidgets import QApplication, QFileDialog, QInputDialog, QMainWindow, QAction, QPushButton, qApp, QDesktopWidget
+from PyQt5.QtGui import QImage, QIntValidator, QPainter, QPen
+from PyQt5.QtWidgets import QApplication, QCheckBox, QFileDialog, QFormLayout, QInputDialog, QLineEdit, QMainWindow, QAction, QPushButton, qApp, QDesktopWidget
 
 class DrawingTool(QMainWindow):
     
     def __init__(self):
         super().__init__()
+        
         self.image = QImage(QSize(160, 80), QImage.Format_RGB32)
         self.image.fill(Qt.white)
         self.drawing = False
@@ -15,7 +15,7 @@ class DrawingTool(QMainWindow):
         self.brush_color = Qt.black
         self.last_point = QPoint()
         self.savepath = ''
-        self.username = 'Default'
+        self.username = '테스트'
         self.number = 0
         self.initUI()
         
@@ -40,13 +40,23 @@ class DrawingTool(QMainWindow):
         filemenu.addAction(save_action)
         filemenu.addAction(clear_action)
         
-        self.btn = QPushButton('Set Username', self)
-        self.btn.move(5, 5)
-        self.btn.clicked.connect(self.setUsername)
+        self.e1 = QLineEdit(self)
+        self.e1.setValidator(QIntValidator())
+        self.e1.setMaxLength(4)
+        self.e1.setAlignment(Qt.AlignRight)
+        self.e1.move(5, 5)
+        self.e1.returnPressed.connect(self.setNumber)
+        self.e1.setText('1')
         
-        self.nbtn = QPushButton('Set Number', self)
-        self.nbtn.move(110, 5)
-        self.nbtn.clicked.connect(self.setNumber)
+        self.e2 = QLineEdit(self)
+        self.e2.setMaxLength(4)
+        self.e2.setAlignment(Qt.AlignRight)
+        self.e2.move(110, 5)
+        self.e2.returnPressed.connect(self.setUsername)
+        self.e2.setText('테스트')
+        
+        self.e3 = QCheckBox(self)
+        self.e3.move(220, 5)
         
         self.setWindowTitle('Sign Drawing Tool')
         self.resize(800, 400)
@@ -60,17 +70,19 @@ class DrawingTool(QMainWindow):
         self.move(qr.topLeft())
     
     def setUsername(self):
-        username, ok = QInputDialog.getText(self, 'InputDialog', 'Enter Username')
-
-        if ok:
+        username = self.e2.text()
+        
+        if username == '':
+            self.username = '테스트'
+            self.e2.setText(self.username)
+        else:
             self.username = username
             self.number = 0
+            self.e1.setText('0')
         
     def setNumber(self):
-        number, ok = QInputDialog.getInt(self, 'InputDialog', 'Enter Number')
-        
-        if ok:
-            self.number = number
+        number = self.e1.text()
+        self.number = int(number)
     
     def pixelpos(self, x, y):
         return QPoint(int(x/(self.width()/160)), int(y/(self.height()/80)))
@@ -112,11 +124,17 @@ class DrawingTool(QMainWindow):
             
             if fpath:
                 self.savepath = fpath
+                fpath = self.savepath + '/' + str(self.number) + '_' + self.username + '_' + str(self.e3.isChecked()) + '.png'
+                self.image.save(fpath)
+                self.clear()
+                self.number += 1
+                self.e1.setText(str(self.number))
         else:
-            fpath = self.savepath + '/' + str(self.number) + '_' + self.username + '.png'
+            fpath = self.savepath + '/' + str(self.number) + '_' + self.username + '_' + str(self.e3.isChecked()) + '.png'
             self.image.save(fpath)
             self.clear()
             self.number += 1
+            self.e1.setText(str(self.number))
         
 if __name__ == '__main__':
     app = QApplication(sys.argv)
