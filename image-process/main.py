@@ -1,108 +1,79 @@
-import cv2, sys
-from PIL import Image
-from matplotlib import pyplot as plt
+import cv2
 import numpy as np
-import os
-import os.path
-import copy
+from scipy.spatial import distance as dist
+
+def label(image, contour):
+
+
+   mask = np.zeros(image.shape[:2], dtype="uint8")
+   cv2.drawContours(mask, [contour], -1, 255, -1)
+
+   mask = cv2.erode(mask, None, iterations=2)
+   mean = cv2.mean(image, mask=mask)[:3]
+
+
+   minDist = (np.inf, None)
+
+
+
+   for (i, row) in enumerate(lab):
+
+       d = dist.euclidean(row[0], mean)
+
+       if d < minDist[0]:
+           minDist = (d, i)
+
+   return colorNames[minDist[1]]
+
+colors = [[0, 0, 255], [0, 255, 0], [255, 0, 0]]
+colorNames = ["red", "green", "blue"]
+
+
+
+lab = np.zeros((len(colors), 1, 3), dtype="uint8")
+for i in range(len(colors)):
+   lab[i] = colors[i]
+
+lab = cv2.cvtColor(lab, cv2.COLOR_BGR2LAB)
 
 path = './img/sain.png'
-image = cv2.imread(path)
-image_gray = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
+image = cv2.imread(path, 1)
 
-des = cv2.bitwise_not(image_gray)
-contour,hier = cv2.findContours(des,cv2.RETR_CCOMP,cv2.CHAIN_APPROX_SIMPLE)
 
-for cnt in contour:
-    cv2.drawContours(des,[cnt],0,255,-1)
+blurred = cv2.GaussianBlur(image, (5, 5), 0)
 
-gray = cv2.bitwise_not(des)
+gray = cv2.cvtColor(blurred, cv2.COLOR_BGR2GRAY)
+ret, thresh = cv2.threshold(gray, 60, 255, cv2.THRESH_BINARY)
 
-cv2.imshow('Edged', gray)
+img_lab = cv2.cvtColor(blurred, cv2.COLOR_BGR2LAB)
+
+thresh = cv2.erode(thresh, None, iterations=2)
+cv2.imshow("Thresh", thresh)
+
+
+contours = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+
+if len(contours) == 2:
+   contours = contours[0]
+
+elif len(contours) == 3:
+   contours = contours[1]
+
+
+for contour in contours:
+
+   cv2.imshow("Image", image)
+   cv2.waitKey(0)
+
+
+   cv2.drawContours(image, [contour], -1, (0, 255, 0), 2)
+
+
+   color_text = label(img_lab, contour)
+   setLabel(image, color_text, contour)
+
+
+cv2.imshow("Image", image)
 cv2.waitKey(0)
 
-cv2.destroyAllWindows()
-
-# r.save("D:/temp/pika_rev.png")
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# import cv2
-# import os
-# import os.path
-
-# path = './img/insa.png'
-# print(path)
-
-# src = cv2.imread(path)
-
-# gray = cv2.cvtColor(src, cv2.COLOR_RGB2GRAY)
-# tree = src.copy()
-
-# contours, hierarchy = cv2.findContours(gray, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-# for contour in contours:
-#     src = cv2.drawContours(src, [contour], -1, (0, 255, 0), 2)
-
-# contour,hierarchy = cv2.findContours(gray, cv2.RETR_TREE, cv2.CHAIN_APPROX_NONE)
-# for contour in contours:
-#     tree = cv2.drawContours(tree, [contour], -1, (0, 255, 0), 2)
-
-
-# cv2.imshow('ext', src)
-# cv2.imshow('tree', tree)
-
-
-# cv2.waitKey()
-# cv2.destroyAllWindows()
