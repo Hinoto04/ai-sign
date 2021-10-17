@@ -100,6 +100,7 @@ class DrawingTool(QMainWindow):
         if(e.buttons() & Qt.LeftButton) & self.drawing:
             painter = QPainter(self.image)
             painter.setPen(QPen(self.brush_color, self.brush_size, Qt.SolidLine, Qt.RoundCap))
+            painter.setOpacity(0.3)
             painter.drawLine(self.last_point, self.pixelpos(e.x(), e.y()))
             self.last_point = self.pixelpos(e.x(), e.y())
             self.update()
