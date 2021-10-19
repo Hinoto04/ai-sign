@@ -36,7 +36,7 @@ for i in range(len(colors)):
 
 lab = cv2.cvtColor(lab, cv2.COLOR_BGR2LAB)
 
-path = './img/sain.png'
+path = './img/Jsain.png'
 image = cv2.imread(path, 1)
 
 
