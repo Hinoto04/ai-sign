@@ -1,15 +1,17 @@
 import cv2
 import numpy as np
 from scipy.spatial import distance as dist
+from tkinter import Label
+import matplotlib.pyplot as plt
 
-def label(image, contour):
+def Label(image, contour):
 
 
-   mask = np.zeros(image.shape[:2], dtype="uint8")
-   cv2.drawContours(mask, [contour], -1, 255, -1)
+   mask = np.zeros(image.shape[:1], dtype="uint8")
+   cv2.drawContours(mask, [contour], -1, 125, 1)
 
-   mask = cv2.erode(mask, None, iterations=2)
-   mean = cv2.mean(image, mask=mask)[:3]
+   mask = cv2.erode(mask, None, iterations=1)
+   mean = cv2.mean(image, mask=mask)[:1]
 
 
    minDist = (np.inf, None)
@@ -36,14 +38,14 @@ for i in range(len(colors)):
 
 lab = cv2.cvtColor(lab, cv2.COLOR_BGR2LAB)
 
-path = './img/Jsain.png'
+path = './img/test2.png'
 image = cv2.imread(path, 1)
 
 
-blurred = cv2.GaussianBlur(image, (5, 5), 0)
+blurred = cv2.GaussianBlur(image, (1, 1), 0)
 
 gray = cv2.cvtColor(blurred, cv2.COLOR_BGR2GRAY)
-ret, thresh = cv2.threshold(gray, 60, 255, cv2.THRESH_BINARY)
+ret, thresh = cv2.threshold(gray, 30, 225, cv2.THRESH_BINARY)
 
 img_lab = cv2.cvtColor(blurred, cv2.COLOR_BGR2LAB)
 
@@ -54,7 +56,7 @@ cv2.imshow("Thresh", thresh)
 contours = cv2.findContours(thresh.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
 
-if len(contours) == 2:
+if len(contours) == 1:
    contours = contours[0]
 
 elif len(contours) == 3:
@@ -67,11 +69,9 @@ for contour in contours:
    cv2.waitKey(0)
 
 
-   cv2.drawContours(image, [contour], -1, (0, 255, 0), 2)
 
-
-   color_text = label(img_lab, contour)
-   setLabel(image, color_text, contour)
+   color_text = Label(img_lab, contour)
+   Label(image, color_text, contour)
 
 
 cv2.imshow("Image", image)
