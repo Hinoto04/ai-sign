@@ -38,7 +38,7 @@ for i in range(len(colors)):
 
 lab = cv2.cvtColor(lab, cv2.COLOR_BGR2LAB)
 
-path = './img/test2.png'
+path = './img/test.png'
 image = cv2.imread(path, 1)
 
 
